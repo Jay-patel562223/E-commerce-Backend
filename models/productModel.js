@@ -33,7 +33,6 @@ var productSchema = new mongoose.Schema(
     quality: {
       type: Number,
       required: true,
-      select: false,
     },
     sold: {
       type: Number,
