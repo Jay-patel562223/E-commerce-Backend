@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 
 //* Check Token Authentication
-const authMiddleware = asyncHandler(async (req, res, next) => {
+exports.authMiddleware = asyncHandler(async (req, res, next) => {
   let token;
   if (req?.headers?.authorization?.startsWith("Bearer")) {
     token = req.headers.authorization.split(" ")[1];
@@ -23,7 +23,7 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
 });
 
 //* Check a user is Admin or not
-const isAdmin = asyncHandler(async (req, res, next) => {
+exports.isAdmin = asyncHandler(async (req, res, next) => {
   const { email } = req.user;
   const adminUser = await User.findOne({ email });
   if (adminUser.role !== "admin") {
@@ -33,4 +33,3 @@ const isAdmin = asyncHandler(async (req, res, next) => {
   }
 });
 
-module.exports = { authMiddleware, isAdmin };

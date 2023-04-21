@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
 
 //* Create Product
-const createProduct = asyncHandler(async (req, res) => {
+exports.createProduct = asyncHandler(async (req, res) => {
   try {
     if (req.body.title) {
       req.body.slug = slugify(req.body.title);
@@ -16,7 +16,7 @@ const createProduct = asyncHandler(async (req, res) => {
 });
 
 //* Update Product
-const updateProduct = asyncHandler(async (req, res) => {
+exports.updateProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     if (req.body.title) {
@@ -32,7 +32,7 @@ const updateProduct = asyncHandler(async (req, res) => {
 });
 
 //! Delete Product
-const deleteProduct = asyncHandler(async (req, res) => {
+exports.deleteProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     const deleteProduct = await Product.findByIdAndDelete(id);
@@ -43,7 +43,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 });
 
 //* Get Product
-const getProduct = asyncHandler(async (req, res) => {
+exports.getProduct = asyncHandler(async (req, res) => {
   const { id } = req.params;
   try {
     const findProduct = await Product.findById(id);
@@ -54,7 +54,7 @@ const getProduct = asyncHandler(async (req, res) => {
 });
 
 //* Get All Product
-const getAllProduct = asyncHandler(async (req, res) => {
+exports.getAllProduct = asyncHandler(async (req, res) => {
   try {
     //* Filtering
     const queryObj = { ...req.query };
@@ -99,11 +99,3 @@ const getAllProduct = asyncHandler(async (req, res) => {
     throw new Error(error);
   }
 });
-
-module.exports = {
-  createProduct,
-  getProduct,
-  getAllProduct,
-  updateProduct,
-  deleteProduct,
-};

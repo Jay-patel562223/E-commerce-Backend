@@ -4,9 +4,10 @@ const asyncHandler = require("express-async-handler");
 const validateMongoDbId = require("../utils/validateMongodbId");
 const { generateRefreshToken } = require("../config/refreshToken");
 const jwt = require("jsonwebtoken");
+const { sendEMail } = require("./emailCtrl");
 
 //* Create User
-const createUser = asyncHandler(async (req, res) => {
+exports.createUser = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const findUser = await User.findOne({ email });
   if (!findUser) {
@@ -19,7 +20,7 @@ const createUser = asyncHandler(async (req, res) => {
 });
 
 //* Login User
-const loginUser = asyncHandler(async (req, res) => {
+exports.loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   //!check if user exist or not
   const findUser = await User.findOne({ email });
@@ -52,7 +53,7 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 //* Handle refresh token
-const handleRefreshToken = asyncHandler(async (req, res) => {
+exports.handleRefreshToken = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken) {
     throw new Error("No Refresh Token in Cookies");
@@ -72,7 +73,7 @@ const handleRefreshToken = asyncHandler(async (req, res) => {
 });
 
 //! Logout Function
-const logout = asyncHandler(async (req, res) => {
+exports.logout = asyncHandler(async (req, res) => {
   const cookie = req.cookies;
   if (!cookie?.refreshToken) {
     throw new Error("No Refresh Token in Cookies");
@@ -97,7 +98,7 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 //* Update a User
-const updateUser = asyncHandler(async (req, res) => {
+exports.updateUser = asyncHandler(async (req, res) => {
   const { id } = req.user;
   validateMongoDbId(id);
   try {
@@ -120,7 +121,7 @@ const updateUser = asyncHandler(async (req, res) => {
 });
 
 //*Get All User
-const getallUser = asyncHandler(async (req, res) => {
+exports.getallUser = asyncHandler(async (req, res) => {
   try {
     const getUsers = await User.find();
     res.json(getUsers);
@@ -130,7 +131,7 @@ const getallUser = asyncHandler(async (req, res) => {
 });
 
 //*Get a single user
-const getUser = asyncHandler(async (req, res) => {
+exports.getUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
@@ -142,7 +143,7 @@ const getUser = asyncHandler(async (req, res) => {
 });
 
 //!Delete a User
-const deleteUser = asyncHandler(async (req, res) => {
+exports.deleteUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
@@ -154,7 +155,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 });
 
 //! Block a User
-const blockUser = asyncHandler(async (req, res) => {
+exports.blockUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
@@ -177,7 +178,7 @@ const blockUser = asyncHandler(async (req, res) => {
 });
 
 //* Unblock a User
-const unblockUser = asyncHandler(async (req, res) => {
+exports.unblockUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
@@ -199,15 +200,42 @@ const unblockUser = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = {
-  createUser,
-  loginUser,
-  getallUser,
-  getUser,
-  deleteUser,
-  updateUser,
-  blockUser,
-  unblockUser,
-  handleRefreshToken,
-  logout,
-};
+//* Update Password
+exports.updatePassword = asyncHandler(async (req, res) => {
+  const { id } = req.user;
+  const { password } = req.body;
+  validateMongoDbId(id);
+  const user = await User.findById(id);
+  try {
+    if (password) {
+      user.password = password;
+      const updatedPassword = await user.save();
+      res.json(updatedPassword);
+    } else {
+      res.json(user);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+//! Forgot password Token
+exports.forgotPasswordToken = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) throw new Error("User not Found with this email");
+  try {
+    const token = await user.createPasswordResetToken();
+    const resetURL = `Hello, Please follow this link to reset Your password. This link is valid till 10 minutes from now. <a href='http://localhost:5000/api/user/updatepassword/${token}'>Click Here</a>`;
+    const data = {
+      to: email,
+      text: "Hey User",
+      subject: "Forget password Link",
+      html: resetURL,
+    };
+    sendEMail(data);
+    res.json(token);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
