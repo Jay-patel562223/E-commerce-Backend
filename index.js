@@ -9,7 +9,7 @@ require("./config/dbConnect");
 const PORT = process.env.PORT || 4000;
 const morgan = require("morgan");
 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.json());
 app.use(cookieParser());
 
