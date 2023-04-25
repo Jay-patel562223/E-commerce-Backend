@@ -30,7 +30,7 @@ var productSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    quality: {
+    quantity: {
       type: Number,
       required: true,
     },
