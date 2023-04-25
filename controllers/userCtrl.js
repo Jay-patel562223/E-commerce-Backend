@@ -227,6 +227,7 @@ exports.forgotPasswordToken = asyncHandler(async (req, res) => {
   if (!user) throw new Error("User not Found with this email");
   try {
     const token = await user.createPasswordResetToken();
+    await user.save();
     const resetURL = `Hello, Please follow this link to reset Your password. This link is valid till 10 minutes from now. <a href='http://localhost:5000/api/user/reset-password/${token}'>Click Here</a>`;
     const data = {
       to: email,
