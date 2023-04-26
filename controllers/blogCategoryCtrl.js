@@ -1,23 +1,23 @@
-const PCategory = require("../models/prodCategoryModel");
+const BCategory = require("../models/blogCategoryModel");
 const asyncHandler = require("express-async-handler");
 const validateMongoDbId = require("../utils/validateMongodbId");
 
-//* Create Product Category
+//* Create Blog Category
 exports.createCategory = asyncHandler(async (req, res) => {
   try {
-    const newCategory = await PCategory.create(req.body);
+    const newCategory = await BCategory.create(req.body);
     res.json({ status: "success", newCategory });
   } catch (error) {
     throw new Error(error);
   }
 });
 
-//* Update Product Category
+//* Update Blog Category
 exports.updateCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const updateCategory = await PCategory.findByIdAndUpdate(id, req.body, {
+    const updateCategory = await BCategory.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     res.json({ status: "success", updateCategory });
@@ -26,34 +26,34 @@ exports.updateCategory = asyncHandler(async (req, res) => {
   }
 });
 
-//! Delete Product Category
+//! Delete Blog Category
 exports.deleteCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const deleteCategory = await PCategory.findByIdAndDelete(id);
+    const deleteCategory = await BCategory.findByIdAndDelete(id);
     res.json({ status: "success", deleteCategory });
   } catch (error) {
     throw new Error(error);
   }
 });
 
-//* Get Product Category
+//* Get Blog Category
 exports.getCategory = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const getCategory = await PCategory.findById(id);
+    const getCategory = await BCategory.findById(id);
     res.json({ status: "success", getCategory });
   } catch (error) {
     throw new Error(error);
   }
 });
 
-//* Get All Product category
+//* Get All Blog category
 exports.getAllCategory = asyncHandler(async (req, res) => {
   try {
-    const getallCategory = await PCategory.find();
+    const getallCategory = await BCategory.find();
     res.json({ status: "success", getallCategory });
   } catch (error) {
     throw new Error(error);
