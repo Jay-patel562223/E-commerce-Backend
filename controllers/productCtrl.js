@@ -1,6 +1,8 @@
 const Product = require("../models/productModel");
 const asyncHandler = require("express-async-handler");
 const slugify = require("slugify");
+const User = require("../models/userModel");
+const { default: mongoose } = require("mongoose");
 
 //* Create Product
 exports.createProduct = asyncHandler(async (req, res) => {
@@ -95,6 +97,106 @@ exports.getAllProduct = asyncHandler(async (req, res) => {
 
     const product = await query;
     res.json(product);
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+//* Add Wishlist
+exports.addToWishlist = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { proId } = req.body;
+  try {
+    const user = await User.findById(_id);
+    const alreadyAdded = user.wishlist.find((id) => id.toString() === proId);
+    if (alreadyAdded) {
+      let user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $pull: { wishlist: proId },
+        },
+        {
+          new: true,
+        }
+      );
+      return res.json(user);
+    } else {
+      let user = await User.findByIdAndUpdate(
+        _id,
+        {
+          $push: { wishlist: proId },
+        },
+        {
+          new: true,
+        }
+      );
+      return res.json(user);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+});
+
+//* Product rating
+exports.rating = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  const { star, comment, prodId } = req.body;
+  try {
+    const product = await Product.findById(prodId);
+    let alreadyRated = product.ratings.find(
+      (userId) => userId.postedby.toString() === _id.toString()
+    );
+    if (alreadyRated) {
+      await Product.updateOne(
+        {
+          ratings: { $elemMatch: alreadyRated },
+        },
+        {
+          $set: { "ratings.$.star": star, "ratings.$.comment": comment },
+        },
+        {
+          new: true,
+        }
+      );
+    } else {
+      await Product.findByIdAndUpdate(
+        prodId,
+        {
+          $push: {
+            ratings: {
+              star: star,
+              comment: comment,
+              postedby: _id,
+            },
+          },
+        },
+        {
+          new: true,
+        }
+      );
+    }
+    const totalRating = await Product.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(prodId) } },
+      { $unwind: "$ratings" },
+      { $project: { "ratings.star": 1 } },
+      { $project: { Star: "$ratings.star" } },
+      {
+        $group: {
+          _id: `${prodId}`,
+          total: { $avg: "$Star" },
+        },
+      },
+    ]);
+    const finalProduct = await Product.findByIdAndUpdate(
+      prodId,
+      {
+        totalrating: totalRating[0].total,
+      },
+      {
+        new: true,
+      }
+    );
+    return res.json(finalProduct);
   } catch (error) {
     throw new Error(error);
   }
