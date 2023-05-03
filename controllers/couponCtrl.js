@@ -37,14 +37,11 @@ exports.getAllCoupon = asyncHandler(async (req, res) => {
 //* Update Coupon
 exports.updateCoupon = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  console.log(req.body);
-  console.log(id)
   validateMongoDbId(id);
   try {
     const updateCoupon = await Coupon.findByIdAndUpdate(id, req.body, {
       new: true,
     });
-    console.log(updateCoupon);
     res.json(updateCoupon);
   } catch (error) {
     throw new Error(error);
