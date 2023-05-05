@@ -4,7 +4,7 @@ const slugify = require("slugify");
 const User = require("../models/userModel");
 const { default: mongoose, Error } = require("mongoose");
 const validateMongoDbId = require("../utils/validateMongodbId");
-const cloudinaryUploging = require("../utils/cloudinary");
+const { cloudinaryUploadImg } = require("../utils/cloudinary");
 
 //* Create Product
 exports.createProduct = asyncHandler(async (req, res) => {
@@ -209,7 +209,7 @@ exports.uploadImages = asyncHandler(async (req, res) => {
   const { id } = req.params;
   validateMongoDbId(id);
   try {
-    const uploader = (path) => cloudinaryUploging(path, "images");
+    const uploader = (path) => cloudinaryUploadImg(path, "images");
     const urls = [];
     const files = req.files;
     for (const file of files) {
@@ -228,7 +228,7 @@ exports.uploadImages = asyncHandler(async (req, res) => {
         new: true,
       }
     );
-    res.json(findProduct)
+    res.json(findProduct);
   } catch (error) {
     throw new Error(error);
   }
